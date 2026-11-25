@@ -123,7 +123,7 @@ public final class BundleGuard implements Listener {
         if (!active) return;
         if (event.getHand() != EquipmentSlot.HAND) return;
         ItemStack item = event.getItem();
-        if (item == null || item.getType() != Material.BUNDLE) return;
+        if (item == null || !isBundle(item.getType())) return;
 
         Player player = event.getPlayer();
         long now = System.currentTimeMillis();
@@ -185,6 +185,18 @@ public final class BundleGuard implements Listener {
             blocked.incrementAndGet();
             log.warn("Cancelled inventory click flood by " + player.getName() + ".");
         }
+    }
+
+    /**
+     * Every bundle counts, not just the plain one: 1.21.5 added dyed bundles
+     * (WHITE_BUNDLE ... BLACK_BUNDLE) that carry the same contents and therefore
+     * the same duplication vector. Matching on the name suffix keeps this correct
+     * on versions that predate them, and survives new colours being added.
+     */
+    static boolean isBundle(Material type) {
+        if (type == Material.BUNDLE) return true;
+        String name = type.name();
+        return name.endsWith("_BUNDLE");
     }
 
     private static final class State {

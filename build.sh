@@ -12,7 +12,9 @@ cd "$(dirname "$0")"
 OUT_DIR="${1:-dist}"
 LIB_DIR="build/lib"
 CLASSES_DIR="build/classes"
-PAPER_API_VERSION="1.21.11-R0.1-SNAPSHOT"
+# Override to compile against another Minecraft version, e.g.
+#   PAPER_API_VERSION=1.21.4-R0.1-SNAPSHOT ./build.sh
+PAPER_API_VERSION="${PAPER_API_VERSION:-1.21.11-R0.1-SNAPSHOT}"
 PAPER_REPO="https://repo.papermc.io/repository/maven-public"
 MAVEN_CENTRAL="https://repo1.maven.org/maven2"
 
