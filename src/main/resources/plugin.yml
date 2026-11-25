@@ -1,0 +1,19 @@
+name: DupeGuard
+version: 1.1.0
+main: io.github.dupeguard.DupeGuardPlugin
+api-version: '1.21'
+description: Patches small-dripleaf (bonemeal tree-capture leak) and bundle/NBT disconnect dupe vectors.
+authors: [dsh]
+website: https://github.com/
+
+commands:
+  dupeguard:
+    description: DupeGuard admin command
+    usage: /dupeguard <status|reload>
+    permission: dupeguard.admin
+    aliases: [dg]
+
+permissions:
+  dupeguard.admin:
+    description: Allows using /dupeguard
+    default: op

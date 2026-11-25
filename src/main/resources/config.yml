@@ -1,0 +1,84 @@
+# DupeGuard — anti-duplication patches for Paper/Spigot 1.21.x
+#
+# Two independent modules. Disable either one if you patch the server itself.
+
+dripleaf:
+  # Small-dripleaf "universal dupe" (Spigot/Paper/Folia, 1.17 - 26.1.2).
+  #
+  # Root cause: spigot's BlockFertilizeEvent handling wraps bonemeal growth in
+  # `captureTreeGeneration` bookkeeping. When a small dripleaf is bonemealed while
+  # its lower half is missing (an "update skipper" plant), the growth path returns
+  # early and the flag is never cleared, so subsequent block changes are captured
+  # instead of written. The block still drops its item on break but is not removed
+  # from the world, allowing break -> interact -> break again.
+  #
+  # This module refuses bonemeal on structurally broken small dripleafs and
+  # verifies every grow result afterwards.
+  enabled: true
+
+  # Cancel BlockFertilizeEvent when the target is a small dripleaf whose other
+  # half is missing / mismatched. This closes the exploit before it can start.
+  block-broken-dripleaf-bonemeal: true
+
+  # Extra guard: cancel bonemeal if the block above/below is not the matching half.
+  block-half-mismatch-bonemeal: true
+
+  # After a successful grow, re-validate the resulting big dripleaf and clean up
+  # malformed ones (only acts when the plugin actually observes a bad state).
+  sanitize-after-grow: true
+
+  # Repair broken small-dripleaf halves found in loaded chunks when they are
+  # interacted with (prevents building the exploit state in the first place).
+  repair-on-interact: true
+
+  # Remove the illegal plant after blocking it, instead of leaving it in the world.
+  #
+  # An ORPHAN/MISMATCH plant cannot be produced by vanilla placement: it only
+  # exists because the exploit built it while update suppression was active.
+  # Vanilla canSurvive neighbour updates cannot reach such a plant, so it stays
+  # forever and keeps inviting attempts. Purging restores a legal world state.
+  #
+  # Runs one tick after the block, and re-checks the block before removing it.
+  auto-purge-illegal: true
+
+  # Notify the player when an action is blocked. Keep false on big servers.
+  notify-player: false
+
+bundle:
+  # Bundle / Netty-disconnect dupe (1.21.2+).
+  #
+  # Root cause: a flood of oversized packets stalls the Netty pipeline while the
+  # connection still looks alive. A queued "use item" is then processed after the
+  # player was saved and removed from the world, dropping bundle contents from an
+  # entity that no longer exists.
+  #
+  # This module clears the active item on quit (the upstream fix), rate-limits
+  # bundle use, and refuses impossible packet bursts.
+  enabled: true
+
+  # Clear the player's active item on quit (the actual fix for the disconnect dupe).
+  clear-active-item-on-quit: true
+
+  # Minimum interval between two bundle "use" actions, in milliseconds.
+  bundle-use-cooldown-ms: 250
+
+  # Cancel bundle use if the player sent more than this many use-item packets
+  # within the sliding window below.
+  max-use-item-per-window: 12
+
+  # Sliding window for the counter above, in milliseconds.
+  use-item-window-ms: 1000
+
+  # Cancel bundle use entirely while the player's connection is congested.
+  # Uses Paper's per-player ping when available; -1 disables the check.
+  max-ping-ms: -1
+
+  # Also clear the active item when a player changes worlds (teleport out) to
+  # avoid the same "entity gone, connection alive" window.
+  clear-active-item-on-world-change: true
+
+  # Log blocked attempts to console (rate-limited).
+  log-blocks: true
+
+# Global safety switch.
+enabled: true
